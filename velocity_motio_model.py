@@ -13,7 +13,7 @@ class VelocityMotionModel():
         self._a_1, self._a_2, self._a_3, self._a_4, self._a_5, self._a_6 = alpha
         pass
 
-    def motion_model_velocity(self, pose, command, pose_prime):
+    def motion_model_velocity(self, pose, command, pose_prime, d_time):
         '''
         This method has not been tested
         pose - [x, y, theta] describing the objects position and orientation
@@ -22,8 +22,6 @@ class VelocityMotionModel():
 
         returns the probability of object taking the pose_prime position
         '''
-        #TODO: delta time logic needs to be implemented
-        d_time = 1
 
         _x, _y, _theta = pose    
         _x_p, _y_p, _theta_p = pose_prime
@@ -80,11 +78,8 @@ class VelocityMotionModel():
         else:
             return (np.sqrt(6*b) - np.abs(a)) / (6 * a)
 
-    def sample_motion_model_velocity(self, pose, command, n):
+    def sample_motion_model_velocity(self, pose, command, n, d_time):
         #TODO: test model with higher dimension motion, currently only [x, y, theta] and [v, w] motion is supported 
-        #TODO: delta time logic needs to be implemented
-    
-        d_time = 1
         _v, _w = command 
         _x, _y, _theta = pose.T
         
@@ -102,25 +97,25 @@ class VelocityMotionModel():
 
 if __name__ == "__main__":
     print ("Executing __main__ method for the VMM class")
-    alphas = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
-    initial_pose = np.array([[1,0,np.pi/2]]).T
-    samples = 10
+    alphas = np.array([0.001, 0.001, 0.001, 0.001, 0.001, 0.001])
+    initial_pose = np.array([[1,0,np.pi/2]])
+    particles = 100
     iterations = 150
     command = [np.pi, np.pi/100]
-    print ("Using test alpha values: " + ' '.join(map(str, alphas)))    
+    print ("Using alpha values: " + ' '.join(map(str, alphas)))    
     print("Using initial pose: " + ' '.join(map(str, initial_pose)))
-    print("Samples used: " + samples.__str__())
+    print("Samples used: " + particles.__str__())
     print("Movement steps: " + iterations.__str__())
-    print("Using testing command : " + ' '.join(map(str, command)))
+    print("Using command : " + ' '.join(map(str, command)))
 
     vmm = VelocityMotionModel(alphas)    
 
-    plt.plot(initial_pose[0], initial_pose[1], 'o', markerfacecolor='black')
-    step_particles = vmm.sample_motion_model_velocity(initial_pose.T, command, samples).T
+    plt.plot(initial_pose.T[0], initial_pose.T[1], 'o', markerfacecolor='black')
+    step_particles = vmm.sample_motion_model_velocity(initial_pose, command, n=particles, d_time=1)
 
-    plt.plot(step_particles[0], step_particles[1], 'o', markerfacecolor='white')
+    plt.plot(step_particles.T[0], step_particles.T[1], 'o', markerfacecolor='white')
     for step in range(0,iterations):
-        step_particles = vmm.sample_motion_model_velocity(step_particles.T, command, 1).T
-        plt.plot(step_particles[0], step_particles[1], 'o', markerfacecolor='white')
+        step_particles = vmm.sample_motion_model_velocity(step_particles, command, n=1, d_time=1)
+        plt.plot(step_particles.T[0], step_particles.T[1], 'o', markerfacecolor='white')
 
     plt.show()
