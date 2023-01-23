@@ -28,6 +28,7 @@ Using command : 3.141592653589793 0.031415926535897934
 
 ```python
 from velocity_motio_model import VelocityMotionModel
+import numpy as np
 
 #initialize with uncertainty values
 vmm = VelocityMotionModel(np.array([0.001, 0.001, 0.001, 0.001, 0.001, 0.001]))  
